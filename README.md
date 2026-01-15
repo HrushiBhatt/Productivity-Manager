@@ -26,12 +26,6 @@ A beautiful, interactive coffee-themed Pomodoro timer with a pure black backgrou
 | `1-4` | Presets |
 | `Esc` | Close modal |
 
-## 🚀 Deploy to GitHub Pages
-
-1. Push to GitHub
-2. Go to Settings → Pages
-3. Select "Deploy from branch" → main
-4. Visit `https://yourusername.github.io/brew-focus/`
 
 ## 📁 Structure
 
