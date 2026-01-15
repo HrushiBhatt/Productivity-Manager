@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brew Focus - Pomodoro Timer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <style>
+        /* Pixel font override for fun look */
+        .logo-text {
+            font-family: 'Press Start 2P', cursive !important;
+            font-size: 1rem !important;
+        }
+        .time-wrapper {
+            font-family: 'Press Start 2P', cursive !important;
+            font-size: clamp(1.8rem, 8vw, 2.5rem) !important;
+        }
+        .timer-label {
+            font-family: 'Press Start 2P', cursive !important;
+            font-size: 0.5rem !important;
+        }
+        .preset-value {
+            font-family: 'Press Start 2P', cursive !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">☕</span>
+                <span class="logo-text">Brew Focus</span>
+            </div>
+            <button class="settings-btn" id="settingsBtn" aria-label="Settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Main Timer Section -->
+        <main class="main">
+            <!-- Mug Container -->
+            <div class="mug-wrapper">
+                <div class="mug-glow"></div>
+                
+                <!-- Steam - Pixel style -->
+                <div class="steam-container" id="steamContainer">
+                    <svg class="pixel-steam" viewBox="0 0 60 40" width="80" height="50">
+                        <g class="steam-group-1">
+                            <rect x="10" y="30" width="4" height="4" fill="rgba(255,255,255,0.6)"/>
+                            <rect x="10" y="24" width="4" height="4" fill="rgba(255,255,255,0.5)"/>
+                            <rect x="14" y="18" width="4" height="4" fill="rgba(255,255,255,0.4)"/>
+                            <rect x="10" y="12" width="4" height="4" fill="rgba(255,255,255,0.3)"/>
+                            <rect x="6" y="6" width="4" height="4" fill="rgba(255,255,255,0.2)"/>
+                        </g>
+                        <g class="steam-group-2">
+                            <rect x="28" y="32" width="4" height="4" fill="rgba(255,255,255,0.6)"/>
+                            <rect x="28" y="26" width="4" height="4" fill="rgba(255,255,255,0.5)"/>
+                            <rect x="24" y="20" width="4" height="4" fill="rgba(255,255,255,0.4)"/>
+                            <rect x="28" y="14" width="4" height="4" fill="rgba(255,255,255,0.3)"/>
+                            <rect x="32" y="8" width="4" height="4" fill="rgba(255,255,255,0.2)"/>
+                        </g>
+                        <g class="steam-group-3">
+                            <rect x="46" y="30" width="4" height="4" fill="rgba(255,255,255,0.6)"/>
+                            <rect x="46" y="24" width="4" height="4" fill="rgba(255,255,255,0.5)"/>
+                            <rect x="42" y="18" width="4" height="4" fill="rgba(255,255,255,0.4)"/>
+                            <rect x="46" y="12" width="4" height="4" fill="rgba(255,255,255,0.3)"/>
+                            <rect x="50" y="6" width="4" height="4" fill="rgba(255,255,255,0.2)"/>
+                        </g>
+                    </svg>
+                </div>
+
+                <!-- Pixel Art Mug -->
+                <svg class="mug-svg" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" style="image-rendering: pixelated;">
+                    <defs>
+                        <!-- Mug colors -->
+                        <linearGradient id="coffeeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#8B5A2B"/>
+                            <stop offset="100%" stop-color="#5D3A1A"/>
+                        </linearGradient>
+                    </defs>
+                    
+                    <!-- Pixel grid size: 8x8 -->
+                    
+                    <!-- Mug Body - White/Cream colored -->
+                    <!-- Back layer -->
+                    <rect x="32" y="40" width="120" height="8" fill="#E8E8E8"/>
+                    <rect x="24" y="48" width="136" height="8" fill="#FFFFFF"/>
+                    <rect x="24" y="56" width="136" height="8" fill="#FFFFFF"/>
+                    <rect x="24" y="64" width="136" height="8" fill="#F5F5F5"/>
+                    <rect x="24" y="72" width="136" height="8" fill="#FFFFFF"/>
+                    <rect x="24" y="80" width="136" height="8" fill="#FFFFFF"/>
+                    <rect x="24" y="88" width="136" height="8" fill="#F5F5F5"/>
+                    <rect x="24" y="96" width="136" height="8" fill="#FFFFFF"/>
+                    <rect x="24" y="104" width="136" height="8" fill="#FFFFFF"/>
+                    <rect x="24" y="112" width="136" height="8" fill="#F5F5F5"/>
+                    <rect x="24" y="120" width="136" height="8" fill="#FFFFFF"/>
+                    <rect x="24" y="128" width="136" height="8" fill="#FFFFFF"/>
+                    <rect x="24" y="136" width="136" height="8" fill="#F5F5F5"/>
+                    <rect x="24" y="144" width="136" height="8" fill="#FFFFFF"/>
+                    <rect x="24" y="152" width="136" height="8" fill="#F0F0F0"/>
+                    <rect x="24" y="160" width="136" height="8" fill="#E8E8E8"/>
+                    <rect x="32" y="168" width="120" height="8" fill="#E0E0E0"/>
+                    <rect x="40" y="176" width="104" height="8" fill="#D8D8D8"/>
+                    
+                    <!-- Mug outline - dark pixels -->
+                    <rect x="32" y="32" width="120" height="8" fill="#2A2A2A"/>
+                    <rect x="24" y="40" width="8" height="8" fill="#2A2A2A"/>
+                    <rect x="152" y="40" width="8" height="8" fill="#2A2A2A"/>
+                    <rect x="16" y="48" width="8" height="136" fill="#2A2A2A"/>
+                    <rect x="160" y="48" width="8" height="120" fill="#2A2A2A"/>
+                    <rect x="16" y="176" width="8" height="8" fill="#2A2A2A"/>
+                    <rect x="24" y="184" width="8" height="8" fill="#2A2A2A"/>
+                    <rect x="32" y="184" width="120" height="8" fill="#2A2A2A"/>
+                    <rect x="152" y="184" width="8" height="8" fill="#2A2A2A"/>
+                    <rect x="160" y="168" width="8" height="16" fill="#2A2A2A"/>
+                    
+                    <!-- Coffee fill (will be animated) -->
+                    <g id="coffeeGroup">
+                        <!-- Coffee surface highlight -->
+                        <rect id="coffeeSurface" x="24" y="48" width="136" height="8" fill="#A67C52"/>
+                        
+                        <!-- Coffee body -->
+                        <rect id="coffeeFill" x="24" y="56" width="136" height="120" fill="#6F4E37"/>
+                        
+                        <!-- Coffee highlight pixels -->
+                        <rect class="coffee-highlight" x="32" y="56" width="8" height="8" fill="#8B6B4C" opacity="0.5"/>
+                        <rect class="coffee-highlight" x="40" y="56" width="8" height="8" fill="#8B6B4C" opacity="0.3"/>
+                    </g>
+                    
+                    <!-- Handle - Pixel style -->
+                    <rect x="160" y="56" width="8" height="8" fill="#2A2A2A"/>
+                    <rect x="168" y="48" width="8" height="8" fill="#2A2A2A"/>
+                    <rect x="176" y="48" width="8" height="8" fill="#2A2A2A"/>
+                    <rect x="184" y="56" width="8" height="8" fill="#2A2A2A"/>
+                    <rect x="184" y="64" width="8" height="8" fill="#2A2A2A"/>
+                    <rect x="192" y="72" width="8" height="56" fill="#2A2A2A"/>
+                    <rect x="184" y="128" width="8" height="8" fill="#2A2A2A"/>
+                    <rect x="184" y="136" width="8" height="8" fill="#2A2A2A"/>
+                    <rect x="176" y="144" width="8" height="8" fill="#2A2A2A"/>
+                    <rect x="168" y="144" width="8" height="8" fill="#2A2A2A"/>
+                    <rect x="160" y="136" width="8" height="8" fill="#2A2A2A"/>
+                    
+                    <!-- Handle fill -->
+                    <rect x="168" y="56" width="16" height="8" fill="#FFFFFF"/>
+                    <rect x="176" y="64" width="8" height="8" fill="#FFFFFF"/>
+                    <rect x="184" y="72" width="8" height="56" fill="#F5F5F5"/>
+                    <rect x="176" y="128" width="8" height="8" fill="#FFFFFF"/>
+                    <rect x="168" y="136" width="8" height="8" fill="#F0F0F0"/>
+                    <rect x="176" y="72" width="8" height="56" fill="#E8E8E8"/>
+                    
+                </svg>
+
+                <!-- Timer Display Overlay -->
+                <div class="timer-display">
+                    <div class="time-wrapper">
+                        <span class="time-digit" id="minutes">25</span>
+                        <span class="time-separator">:</span>
+                        <span class="time-digit" id="seconds">00</span>
+                    </div>
+                    <div class="timer-label" id="timerLabel">READY!</div>
+                </div>
+            </div>
+
+            <!-- Progress Ring -->
+            <div class="progress-container">
+                <svg class="progress-ring" viewBox="0 0 120 120">
+                    <circle class="progress-bg" cx="60" cy="60" r="54" fill="none" stroke-width="6"/>
+                    <circle class="progress-bar" id="progressBar" cx="60" cy="60" r="54" fill="none" stroke-width="6"
+                            stroke-dasharray="339.292" stroke-dashoffset="0"/>
+                </svg>
+                <span class="progress-text" id="progressText">100%</span>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="controls">
+                <button class="control-btn reset-btn" id="resetBtn" aria-label="Reset">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                    </svg>
+                </button>
+                <button class="control-btn play-btn" id="playBtn" aria-label="Start">
+                    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <svg class="pause-icon hidden" viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="6" y="4" width="4" height="16" rx="1"/>
+                        <rect x="14" y="4" width="4" height="16" rx="1"/>
+                    </svg>
+                </button>
+                <button class="control-btn skip-btn" id="skipBtn" aria-label="Skip">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M5 4l10 8-10 8V4z"/>
+                        <rect x="17" y="4" width="2" height="16" rx="1"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Presets -->
+            <div class="presets">
+                <button class="preset-btn" data-time="300">
+                    <span class="preset-value">5</span>
+                    <span class="preset-unit">min</span>
+                </button>
+                <button class="preset-btn" data-time="600">
+                    <span class="preset-value">10</span>
+                    <span class="preset-unit">min</span>
+                </button>
+                <button class="preset-btn active" data-time="1500">
+                    <span class="preset-value">25</span>
+                    <span class="preset-unit">min</span>
+                </button>
+                <button class="preset-btn" data-time="3000">
+                    <span class="preset-value">50</span>
+                    <span class="preset-unit">min</span>
+                </button>
+            </div>
+
+            <!-- Custom Time -->
+            <div class="custom-time">
+                <div class="custom-time-header" id="customToggle">
+                    <span>Custom Time</span>
+                    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </div>
+                <div class="custom-time-content" id="customContent">
+                    <div class="custom-inputs">
+                        <div class="input-field">
+                            <input type="number" id="customMin" min="0" max="180" value="25" placeholder="25">
+                            <label>min</label>
+                        </div>
+                        <span class="input-divider">:</span>
+                        <div class="input-field">
+                            <input type="number" id="customSec" min="0" max="59" value="00" placeholder="00">
+                            <label>sec</label>
+                        </div>
+                        <button class="apply-btn" id="applyCustom">
+                            Apply
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Stats Bar -->
+        <footer class="stats-bar">
+            <div class="stat">
+                <span class="stat-icon">🎯</span>
+                <span class="stat-value" id="sessionsCount">0</span>
+                <span class="stat-label">Sessions</span>
+            </div>
+            <div class="stat">
+                <span class="stat-icon">⏱️</span>
+                <span class="stat-value" id="focusTime">0m</span>
+                <span class="stat-label">Focus Time</span>
+            </div>
+            <div class="stat">
+                <span class="stat-icon">🔥</span>
+                <span class="stat-value" id="streak">0</span>
+                <span class="stat-label">Streak</span>
+            </div>
+        </footer>
+
+        <!-- Settings Modal -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal" id="settingsModal">
+                <div class="modal-header">
+                    <h2>Settings</h2>
+                    <button class="close-btn" id="closeModal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-content">
+                    <div class="setting-item">
+                        <span class="setting-label">Sound</span>
+                        <label class="toggle">
+                            <input type="checkbox" id="soundToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">Notifications</span>
+                        <label class="toggle">
+                            <input type="checkbox" id="notifToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <button class="reset-stats-btn" id="resetStats">
+                            Reset Statistics
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div class="toast" id="toast">
+            <span class="toast-icon">✓</span>
+            <span class="toast-message" id="toastMessage">Timer set!</span>
+        </div>
+    </div>
+
+    <script src="js/timer.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
