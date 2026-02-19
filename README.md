@@ -43,6 +43,3 @@ brew-focus/
 ## License
 
 MIT - Use freely!
-
----
-Made with ☕
