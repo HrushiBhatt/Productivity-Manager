@@ -1,93 +1,120 @@
 # ☕ Brew Focus
 
-A retro pixel-art productivity timer. Your coffee drains while you focus and refills on your break. Every session is logged, so you can see your habits over time and furnish a little pixel café as you go.
+A retro pixel-art productivity tracker. Focus sessions run **on the server**, so they keep going when you close the tab, stay in sync across every tab and device you're signed in on, and add up to tasks, streaks and a year-long consistency grid.
 
-**Stack:** React 19 + Vite · Python / Flask 3 + SQLAlchemy 2 · SQLite
+**Stack:** Go 1.27 (Gin, GORM, SQLite, JWT) · Angular 22 (standalone components, signals, zoneless) · TypeScript · Server-Sent Events · Docker
+
+## How it works
+
+```
+ Angular (per tab)                         Go server
+ ─────────────────                         ──────────────────────────────────────────────
+ Timer / Brew services  ──HTTP──▶  Gin handlers ──▶ engine.Control(user, "pause")
+        ▲                                                     │ command over a channel
+        │                                                     ▼
+        │                                   ┌── one goroutine per running timer ──┐
+        │                                   │ owns its state; select on:          │
+        │                                   │   commands · its deadline · ctx     │
+        │                                   └──────────────┬──────────────────────┘
+        │                                    persists to SQLite │ publishes events
+        │                                                       ▼
+        └──────── SSE: /api/events ◀──── events.Hub (one goroutine, channels only)
+                                          fans out to every client of that user
+```
+
+- **Timer engine** ([`internal/engine`](backend/internal/engine/engine.go)). Each running timer is an actor: a goroutine that owns its state and handles commands (pause, resume, finish, cancel, distraction) sent over a channel, plus its own deadline. Nothing else touches timer state, so it needs no locks. Handlers wait on a reply channel for the new state.
+- **Event hub** ([`internal/events`](backend/internal/events/hub.go)). A single goroutine owns the subscriber map. Subscribes, unsubscribes and publishes all arrive over channels. A client too slow to keep up is disconnected instead of blocking everyone else; its browser reconnects and gets a fresh snapshot.
+- **Crash-safe.** Focus sessions are written to the database when they start and on every change. On boot, `Restore()` restarts every running or paused timer. A block whose deadline passed while the server was down completes immediately, with the full time credited.
+- **Lifecycle.** An `errgroup` runs the hub, the engine and the HTTP server under one context. Ctrl+C or SIGTERM closes the event streams, drains requests, and waits for every timer goroutine to exit.
+- **Clients render, the server decides.** The Angular `Timer` service derives the countdown from the server's deadline, corrected for clock skew, so every device shows the same clock.
 
 ## Features
 
-**Flexible focus**
-- **Rhythms beyond 25/5:** Pomodoro (25/5), 52/17, Animedoro (50/10), Deep Work (90/20), plus your own saved custom modes.
-- **Intention first:** before each block you type a micro-goal. Optional box breathing (4-4-4-4) eases you into deep work.
-- **Reflection after:** when a block ends you write one sentence about what you got done. It's saved to your journal.
-
-**Ambience & audio** (all synthesized in the browser, with no audio files)
-- **Layered soundscapes:** mix rain, café, fireplace and lo-fi keys with separate volumes, or load your own audio file.
-- **Ticking:** choose off, a mechanical clock, or an "ominous" heartbeat. The final minute ticks louder.
-
-**Staying on task**
-- **Strict mode:** warns before you close the tab mid-brew and logs every tab switch as a distraction.
-- **Live tab:** the page title counts down and the favicon's coffee drains, so the timer is readable from any tab.
-- Background notifications and 8-bit chimes. Keyboard shortcuts: `Space` start/pause, `R` reset, `S` finish early / skip break.
-
-**Progress**
-- **Consistency grid:** a GitHub-style heatmap of focus minutes per day over the last year, plus current and best streaks.
-- **Your café:** full brews (blocks that run all the way to 00:00) unlock pixel decorations, from a sprout at 1 up to a golden mug at 100.
-- **Brew journal:** each session's intention, reflection, length and distractions.
+- **Accounts.** Email and password (bcrypt), with a signed session in an HttpOnly cookie. Every record is scoped to its owner. Settings sync across devices.
+- **Tasks.** Plan work with estimated focus blocks, brew a task, and track completed blocks against the estimate, plus minutes spent.
+- **Rhythms.** Pomodoro 25/5, 52/17, Animedoro 50/10, Deep Work 90/20, and your own saved modes.
+- **Intention → breathe → focus → reflect → break.** A micro-goal before each block, optional box breathing, and a one-sentence reflection saved to the journal.
+- **Live sync.** Start on your laptop and pause on your phone. Every tab follows along, including the reflection prompt, which closes everywhere once one tab answers it.
+- **Strict mode.** Tab switches during focus are logged on the server as distractions, and closing the tab asks first.
+- **Ambience.** Rain, café, fireplace and lo-fi layers synthesized with Web Audio (no audio files), your own audio file, and optional clock or "ominous" ticking.
+- **Progress.** Today, streaks, all-time totals, a GitHub-style heatmap, a pixel café that fills as you finish blocks, and the brew journal.
+- **Live tab.** The page title counts down and the favicon's coffee drains.
 
 ## Quick start
 
-Requires Python 3.9+ and Node 20+.
+Requires Go 1.27+ and Node 24.15+.
 
 ```bash
-make install        # venv + pip install, npm install
-make api            # terminal 1: Flask API on :5001
-make web            # terminal 2: Vite on :5173 → open http://localhost:5173
+make install   # go mod download + npm install
+make api       # terminal 1: Go API on :5001
+make web       # terminal 2: Angular on :4200 → open http://localhost:4200
 ```
 
-Single-process production mode: `make serve` builds the frontend, and Flask serves both the app and the API at http://localhost:5001.
+- `make serve` builds everything and runs a single Go process serving the app and the API on :5001.
+- `make test` runs the Go tests under the race detector, then the Angular unit tests.
+- `make docker` builds and runs the production image.
 
-Run the backend tests with `make test`.
-
-> Port 5001 is used because macOS reserves 5000 for AirPlay.
-
-## Deploying
-
-**GitHub Pages (frontend only).** Every push to `main` runs [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml), which builds the React app and publishes it. One-time setup: repo **Settings → Pages → Source: GitHub Actions**. Pages can only serve static files, so this build can't reach Flask. It is built with `VITE_STORAGE=browser`, which stores modes and sessions in the visitor's browser instead, with the same features.
-
-**Full stack.** To run Flask and SQLite together, deploy to any host that runs Python and use `make serve`, where Flask serves the built app and the API from one process.
+> Port 5001 is used because macOS reserves 5000 for AirPlay. Set `JWT_SECRET` in production. Without it, a random key is generated and everyone is logged out on each restart. Set `SECURE_COOKIES=true` when serving over HTTPS.
 
 ## Project structure
 
 ```
 backend/
-  brewfocus/
-    __init__.py      app factory; serves frontend/dist in production
-    models.py        Preset (custom modes), FocusSession (the log)
-    api.py           REST endpoints + validation + streak/heatmap stats
-  tests/test_api.py
-frontend/
-  src/
-    App.jsx          session flow: intention → breathe → focus → reflect → break
-    api.js           Flask client; localApi.js is the browser-storage twin for Pages
-    hooks/           useTimer (wall-clock countdown), useLiveTab, useLocalState
-    audio.js         Web Audio chimes, ticks and procedural ambience
-    sprites.js       pixel art as text (icons + café items)
-    components/      PixelMug, TimerStage, ModePicker, AmbienceMixer, Heatmap, …
-    styles/          base / focus / progress CSS
+  cmd/server/          main: config, errgroup lifecycle, graceful shutdown
+  internal/
+    engine/            server-run timers: one goroutine (actor) per active timer
+    events/            pub/sub hub behind the SSE stream
+    auth/              bcrypt, JWT cookie, Gin middleware
+    store/             GORM models (User, Preset, Task, Session) + SQLite
+    api/               Gin handlers: account, resources, timer + SSE, stats
+frontend/src/app/
+  core/                services: Api, Auth (+guard, interceptor), LiveEvents, Timer, Brew, Ambience
+  brew/                timer stage, tasks, modes, ambience mixer
+  progress/            stats, heatmap, café shelf, journal (signal-driven resource())
+  dialogs/             intention, breathing, reflection, settings
+  shared/              pixel mug, sprite renderer, native <dialog> modal, pipes
+Dockerfile             Angular build → static Go binary → distroless runtime
 ```
 
 ## API
 
+All routes except `/api/health` and `/api/auth/*` require a session.
+
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/presets` | List custom modes |
-| `POST` | `/api/presets` | Save a mode `{name, focus, rest}` (minutes) |
-| `DELETE` | `/api/presets/:id` | Delete a mode |
-| `GET` | `/api/sessions?limit=30` | Recent sessions, newest first |
-| `POST` | `/api/sessions` | Log a finished block `{mode, planned, focused, completed, intention, distractions, day}` |
-| `PATCH` | `/api/sessions/:id` | Add a reflection `{reflection}` |
-| `DELETE` | `/api/sessions` | Delete all sessions |
-| `GET` | `/api/stats?today=YYYY-MM-DD` | Today, streaks, totals, per-day heatmap |
+| `POST` | `/api/auth/register`, `/api/auth/login`, `/api/auth/logout` | Account and session cookie |
+| `GET` / `PUT` | `/api/me`, `/api/me/settings` | Profile and synced settings |
+| `GET` / `POST` / `DELETE` | `/api/presets[/:id]` | Custom timing modes |
+| `GET` / `POST` / `PATCH` / `DELETE` | `/api/tasks[/:id]` | Tasks, with brews and minutes logged against each |
+| `GET` | `/api/timer` | The user's timer right now |
+| `POST` | `/api/timer/:action` | `focus`, `break`, `pause`, `resume`, `finish`, `cancel`, `distraction` |
+| `GET` | `/api/events` | SSE stream: `timer`, `session.completed`, `break.completed`, `session.reflected`, `changed` |
+| `GET` / `PATCH` / `DELETE` | `/api/sessions[/:id]` | Journal and reflections |
+| `GET` | `/api/stats?today=YYYY-MM-DD` | Today, streaks, totals and heatmap (in the user's local day) |
 
-Sessions record the user's *local* calendar day, so streaks roll over at your midnight rather than UTC's.
+## Testing
 
-## Design notes
+- **Go.** The engine, hub and HTTP layer are covered, all under `-race`:
+  - Timers finish on their deadline.
+  - Paused timers never expire.
+  - Restarts restore sessions.
+  - Shutdown doesn't lose running sessions.
+  - 50 users' timers can run at the same time.
+  - Slow SSE clients are dropped without blocking others.
+  - Users can't reach each other's data.
+  - Two clients stay in sync over the event stream.
+- **Angular (Vitest).** Clock-skew correction and out-of-order events in the timer, and the session flow as driven by live events.
+- **CI** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs both suites and builds the Docker image.
 
-- **Timer accuracy:** the countdown is computed from a deadline timestamp, not by counting ticks. The finish is a single `setTimeout`, which browsers don't batch the way they batch repeating timers, so it fires on time in a background tab.
-- **Where state lives:** anything worth keeping (modes, sessions, reflections) is stored in SQLite. Per-device preferences (sound, ambience levels, selected mode) are kept in `localStorage`.
-- **Out of scope for a web app:** blocking other apps and websites requires a browser extension or OS-level tool, and lock-screen widgets / Dynamic Island require a native app. Strict mode and the live tab are the web equivalents.
-- Single-user, no auth. To host it for several people, add accounts and a `user_id` on both tables.
+## Deploying
+
+The Dockerfile builds one small image: the Angular build and a static Go binary on a distroless, non-root base. Run it anywhere that runs containers (Fly.io, Render, Railway, a VPS) with a volume at `/data` for the SQLite database:
+
+```bash
+docker run -p 5001:5001 -v brewfocus-data:/data -e JWT_SECRET=… brew-focus
+```
+
+GitHub Pages only hosts static files, so it can't run this backend.
 
 ## License
 

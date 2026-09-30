@@ -1,25 +1,32 @@
-.PHONY: install api web build serve test
+.PHONY: install api web build serve test docker
 
-# Run tools as `python -m <tool>` rather than via .venv/bin/<tool> scripts: those
-# scripts hard-code the venv's absolute path and break if the project folder moves.
-PY = .venv/bin/python
+# Switch to the Node version in .nvmrc (Angular 22 needs 24.15+) when nvm is installed, so
+# frontend targets work even in a terminal still holding an older Node on its PATH.
+NVM_SH = $${NVM_DIR:-$$HOME/.nvm}/nvm.sh
+NODE = if [ -s "$(NVM_SH)" ]; then . "$(NVM_SH)" --no-use && nvm use --silent >/dev/null \
+	|| { echo "Node $$(cat .nvmrc) isn't installed. Run: nvm install" >&2; exit 1; }; fi;
 
-install: ## (re)create the Python venv and install both halves
-	python3 -m venv --clear backend/.venv
-	cd backend && $(PY) -m pip install -r requirements.txt
-	cd frontend && npm install
+install: ## fetch Go modules and npm packages
+	cd backend && go mod download
+	$(NODE) cd frontend && npm install
 
-api: ## Flask API with auto-reload on :5001
-	cd backend && $(PY) -m flask --app brewfocus run --port 5001 --debug
+api: ## Go API on :5001 (Ctrl+C shuts down gracefully; running timers resume on restart)
+	cd backend && go run ./cmd/server
 
-web: ## Vite dev server on :5173 (proxies /api to :5001)
-	cd frontend && npm run dev
+web: ## Angular dev server on :4200, proxying /api to :5001
+	$(NODE) cd frontend && npx ng serve
 
-build: ## production frontend bundle into frontend/dist
-	cd frontend && npm run build
+build: ## production frontend bundle + static Go binary
+	$(NODE) cd frontend && npx ng build
+	cd backend && CGO_ENABLED=0 go build -o bin/brewfocus ./cmd/server
 
-serve: build ## one process: Flask serves the API and the built app on :5001
-	cd backend && $(PY) -m flask --app brewfocus run --port 5001
+serve: build ## one process: Go serves the API and the built app on :5001
+	cd backend && GIN_MODE=release ./bin/brewfocus -static ../frontend/dist/brew-focus/browser
 
-test:
-	cd backend && $(PY) -m pytest -q
+test: ## Go tests under the race detector, then Angular unit tests
+	cd backend && go vet ./... && go test -race ./...
+	$(NODE) cd frontend && npx ng test --watch=false
+
+docker: ## build and run the production image (data persists in the brewfocus-data volume)
+	docker build -t brew-focus .
+	docker run --rm -p 5001:5001 -v brewfocus-data:/data -e JWT_SECRET=change-me brew-focus

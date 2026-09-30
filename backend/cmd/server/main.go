@@ -1,0 +1,101 @@
+// Command server runs the Brew Focus API and, in production, serves the built Angular app.
+//
+//	go run ./cmd/server                                        # API only, for `ng serve`
+//	go run ./cmd/server -static ../frontend/dist/brew-focus/browser
+//
+// Environment: JWT_SECRET signs login cookies (required in production),
+// SECURE_COOKIES=true when served over HTTPS.
+package main
+
+import (
+	"context"
+	"crypto/rand"
+	"errors"
+	"flag"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"golang.org/x/sync/errgroup"
+
+	"github.com/HrushiBhatt/Productivity-Manager/backend/internal/api"
+	"github.com/HrushiBhatt/Productivity-Manager/backend/internal/auth"
+	"github.com/HrushiBhatt/Productivity-Manager/backend/internal/engine"
+	"github.com/HrushiBhatt/Productivity-Manager/backend/internal/events"
+	"github.com/HrushiBhatt/Productivity-Manager/backend/internal/store"
+)
+
+func main() {
+	addr := flag.String("addr", envOr("ADDR", ":5001"), "listen address (macOS reserves :5000 for AirPlay)")
+	dbPath := flag.String("db", envOr("DB_PATH", "brewfocus.db"), "SQLite database file")
+	static := flag.String("static", os.Getenv("STATIC_DIR"), "directory of the built frontend to serve (optional)")
+	flag.Parse()
+
+	if err := run(*addr, *dbPath, *static); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func run(addr, dbPath, static string) error {
+	secret := []byte(os.Getenv("JWT_SECRET"))
+	if len(secret) == 0 {
+		secret = make([]byte, 32)
+		_, _ = rand.Read(secret)
+		log.Print("JWT_SECRET not set: using a random key, so everyone is logged out when the server restarts")
+	}
+
+	db, err := store.Open(dbPath)
+	if err != nil {
+		return err
+	}
+
+	// One context for everything: Ctrl+C/SIGTERM, or any component failing, stops them all.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	g, ctx := errgroup.WithContext(ctx)
+
+	hub := events.NewHub()
+	g.Go(func() error { hub.Run(ctx); return nil })
+
+	timers := engine.New(ctx, db, hub)
+	if err := timers.Restore(); err != nil {
+		return err
+	}
+
+	srv := &http.Server{
+		Addr: addr,
+		Handler: api.NewRouter(api.Deps{
+			DB: db, Hub: hub, Engine: timers,
+			Auth: auth.NewManager(secret, os.Getenv("SECURE_COOKIES") == "true"),
+		}, static),
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+	g.Go(func() error {
+		log.Printf("Brew Focus listening on http://localhost%s", addr)
+		if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			return err
+		}
+		return nil
+	})
+	g.Go(func() error {
+		<-ctx.Done()
+		// The hub has closed every event stream by now, so in-flight requests drain quickly.
+		shutdown, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		err := srv.Shutdown(shutdown)
+		timers.Wait()
+		log.Print("stopped cleanly")
+		return err
+	})
+	return g.Wait()
+}
+
+func envOr(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
+}

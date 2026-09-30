@@ -1,0 +1,446 @@
+/* ========================================
+   BREW FOCUS: pixel art on pure black
+   ======================================== */
+
+:root {
+  --black: #000;
+  --gray-900: #111;
+  --gray-850: #161616;
+  --gray-800: #1a1a1a;
+  --gray-700: #252525;
+  --gray-600: #333;
+  --gray-500: #555;
+  --gray-400: #777;
+  --gray-300: #999;
+
+  --coffee-dark: #3e2723;
+  --coffee: #5d4037;
+  --coffee-light: #8d6e63;
+  --cream: #d7ccc8;
+  --cream-light: #efebe9;
+
+  --accent: #d4a574;
+  --accent-bright: #e8c49a;
+  --accent-glow: rgba(212, 165, 116, 0.4);
+  --accent-soft: rgba(212, 165, 116, 0.1);
+  --break: #8fd19e;
+  --break-dim: #2e5e3a;
+  --danger: #ef5350;
+
+  --heat-0: #1a1a1a;
+  --heat-1: #3e2723;
+  --heat-2: #6f4e37;
+  --heat-3: #a67c52;
+  --heat-4: #e8c49a;
+
+  --font-main: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-pixel: 'Press Start 2P', ui-monospace, monospace;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: var(--font-main);
+  color: var(--cream-light);
+  background: var(--black) radial-gradient(var(--gray-800) 1px, transparent 1px) 0 0 / 24px 24px;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+:focus-visible {
+  outline: 2px dashed var(--accent);
+  outline-offset: 5px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- pixel boxes ---------------------------------------------------------
+   Four offset hard shadows draw a 3px border with notched corners, the
+   classic 8-bit panel. --lift/--drop add a chunky drop shadow for buttons. */
+.px {
+  --bd: var(--gray-700);
+  box-shadow:
+    0 -3px var(--bd),
+    0 3px var(--bd),
+    -3px 0 var(--bd),
+    3px 0 var(--bd),
+    0 var(--lift, 3px) var(--drop, transparent);
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.icon-sm {
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--gray-400);
+  transition: color 0.2s, transform 0.3s var(--ease-out);
+}
+
+.icon-btn:hover {
+  color: var(--cream);
+}
+
+/* ---- panels ------------------------------------------------------------- */
+
+.panel {
+  margin: 3px;
+  padding: 20px;
+  background: var(--gray-900);
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-family: var(--font-pixel);
+  font-size: 0.65rem;
+  line-height: 1.6;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.panel-note {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--gray-400);
+}
+
+.empty {
+  font-size: 0.9rem;
+  color: var(--gray-500);
+}
+
+/* ---- buttons & form controls ---------------------------------------------- */
+
+.btn {
+  --bd: var(--gray-600);
+  --lift: 7px;
+  --drop: var(--black);
+  padding: 12px 18px;
+  font-weight: 600;
+  color: var(--cream);
+  background: var(--gray-800);
+  transition: transform 0.12s;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.btn:active:not(:disabled) {
+  --lift: 3px;
+  transform: translateY(3px);
+}
+
+.btn-primary {
+  --bd: var(--accent-bright);
+  --drop: var(--coffee-dark);
+  color: var(--black);
+  background: var(--accent);
+}
+
+.btn-danger {
+  --bd: #5c2322;
+  color: var(--danger);
+  background: transparent;
+}
+
+.btn-sm {
+  --lift: 5px;
+  padding: 7px 10px;
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--gray-300);
+}
+
+.input {
+  --bd: var(--gray-600);
+  width: 100%;
+  margin: 3px 0;
+  padding: 10px 12px;
+  color: var(--cream-light);
+  background: var(--gray-800);
+  border: none;
+  outline: none;
+  resize: vertical;
+}
+
+.input:focus {
+  --bd: var(--accent);
+}
+
+.input[type='number'] {
+  font-family: var(--font-pixel);
+  font-size: 0.75rem;
+  text-align: center;
+  appearance: textfield;
+}
+
+.input::-webkit-inner-spin-button {
+  appearance: none;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--gray-300);
+  cursor: pointer;
+}
+
+.check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.range {
+  width: 100%;
+  height: 8px;
+  appearance: none;
+  background: linear-gradient(to right, var(--accent) calc(var(--val) * 100%), var(--gray-700) 0);
+  cursor: pointer;
+}
+
+.range::-webkit-slider-thumb {
+  width: 12px;
+  height: 18px;
+  appearance: none;
+  background: var(--cream-light);
+  box-shadow: 0 3px 0 var(--coffee-dark);
+}
+
+.range::-moz-range-thumb {
+  width: 12px;
+  height: 18px;
+  background: var(--cream-light);
+  border: none;
+  border-radius: 0;
+  box-shadow: 0 3px 0 var(--coffee-dark);
+}
+
+.range:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.switch {
+  position: relative;
+  width: 44px;
+  height: 22px;
+  appearance: none;
+  background: var(--gray-700);
+  box-shadow: 0 0 0 3px var(--gray-600);
+  cursor: pointer;
+}
+
+.switch::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  background: var(--gray-400);
+  transition: transform 0.2s var(--ease-out);
+}
+
+.switch:checked {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bright);
+}
+
+.switch:checked::before {
+  transform: translateX(22px);
+  background: var(--black);
+}
+
+kbd {
+  padding: 2px 6px;
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  background: var(--gray-800);
+  box-shadow: 0 2px 0 var(--gray-600);
+}
+
+/* ---- modal -------------------------------------------------------------- */
+
+.modal {
+  width: 100%;
+  max-width: min(460px, calc(100vw - 32px));
+  margin: auto;
+  overflow: visible;
+  color: inherit;
+  background: transparent;
+  border: none;
+}
+
+.modal::backdrop {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+}
+
+.modal-card {
+  --bd: var(--gray-600);
+  margin: 3px;
+  padding: 24px;
+  background: var(--gray-900);
+  animation: pop 0.25s var(--ease-out);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  font-family: var(--font-pixel);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.modal-body,
+.modal-form {
+  display: grid;
+  gap: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+.setting {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 20px;
+  cursor: pointer;
+}
+
+.setting .switch {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+}
+
+.setting-hint {
+  font-size: 0.75rem;
+  color: var(--gray-400);
+}
+
+.shortcuts {
+  font-size: 0.8rem;
+  line-height: 2;
+  color: var(--gray-400);
+}
+
+/* ---- toast -------------------------------------------------------------- */
+
+.toast {
+  --bd: var(--gray-600);
+  position: fixed;
+  inset: auto auto 24px 50%; /* undo the popover's default centering */
+  margin: 0;
+  border: none;
+  color: var(--cream-light);
+  z-index: 50;
+  max-width: calc(100vw - 32px);
+  padding: 12px 18px;
+  font-size: 0.9rem;
+  background: var(--gray-800);
+  opacity: 0;
+  transform: translate(-50%, 120px);
+  transition: all 0.3s var(--ease-out);
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---- animation ------------------------------------------------------------ */
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

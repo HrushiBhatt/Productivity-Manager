@@ -1,0 +1,64 @@
+.welcome {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  max-width: 420px;
+  margin: 24px auto 0;
+  text-align: center;
+}
+
+.mug {
+  width: 150px;
+}
+
+.title {
+  font-family: var(--font-pixel);
+  font-size: 1.3rem;
+  line-height: 1.4;
+  background: linear-gradient(135deg, var(--cream-light), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tagline {
+  font-size: 0.95rem;
+  color: var(--gray-400);
+}
+
+.card {
+  width: calc(100% - 6px);
+  margin-top: 12px;
+  text-align: left;
+}
+
+.switch-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 3px;
+  margin-bottom: 22px;
+}
+
+.seg {
+  padding: 12px 4px;
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  color: var(--gray-400);
+  background: var(--gray-850);
+}
+
+.seg[aria-selected='true'] {
+  --bd: var(--accent);
+  color: var(--accent-bright);
+  background: var(--accent-soft);
+}
+
+.optional {
+  color: var(--gray-500);
+}
+
+.form-error {
+  font-size: 0.85rem;
+  color: var(--danger);
+}
