@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { environment } from '../../environments/environment';
 import { Auth } from '../core/auth';
 import { Brew } from '../core/brew';
 import { Settings } from '../core/models';
@@ -31,21 +30,12 @@ const TOGGLES: { key: Toggle; label: string; hint: string }[] = [
           <input type="checkbox" class="switch" [checked]="brew.settings()[t.key]" (change)="set(t.key, $event)" />
         </label>
       }
-      @if (!browserOnly) {
-        <p class="setting-hint">Settings are saved to your account, so they follow you to every device.</p>
-      }
+      <p class="setting-hint">Settings are saved to your account, so they follow you to every device.</p>
       <p class="shortcuts"><kbd>Space</kbd> start / pause · <kbd>R</kbd> reset · <kbd>S</kbd> finish or skip</p>
-      @if (browserOnly) {
-        <p class="setting-hint">
-          Demo mode: everything is saved in this browser and synced across its tabs. Run the Go server for
-          accounts and sync across devices.
-        </p>
-      } @else {
-        <div class="account">
-          <span>Signed in as <b>{{ auth.user()?.email }}</b></span>
-          <button class="btn btn-sm px" (click)="logout()">Log out</button>
-        </div>
-      }
+      <div class="account">
+        <span>Signed in as <b>{{ auth.user()?.email }}</b></span>
+        <button class="btn btn-sm px" (click)="logout()">Log out</button>
+      </div>
       <button class="btn btn-danger px" (click)="brew.clearData()">Delete all sessions</button>
     </app-modal>
   `,
@@ -65,7 +55,6 @@ export class SettingsDialog {
   protected readonly brew = inject(Brew);
   protected readonly auth = inject(Auth);
   protected readonly toggles = TOGGLES;
-  protected readonly browserOnly = environment.browserBackend;
 
   protected set(key: Toggle, event: Event): void {
     void this.brew.updateSettings({ [key]: (event.target as HTMLInputElement).checked });
