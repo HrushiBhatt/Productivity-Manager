@@ -67,7 +67,7 @@ export interface Stats {
 }
 
 export type Phase = 'focus' | 'break';
-export type TimerStatus = 'idle' | 'running' | 'paused';
+type TimerStatus = 'idle' | 'running' | 'paused';
 export type TimerAction = 'pause' | 'resume' | 'finish' | 'cancel' | 'distraction';
 
 /** The server-run timer. Remaining time is derived from ends_at while running. */

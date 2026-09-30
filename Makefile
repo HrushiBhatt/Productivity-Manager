@@ -1,5 +1,9 @@
 .PHONY: install api web build serve test docker
 
+# Secrets and local config (JWT_SECRET, ...) come from an untracked .env; see .env.example.
+-include .env
+export JWT_SECRET SECURE_COOKIES ADDR DB_PATH
+
 # Switch to the Node version in .nvmrc (Angular 22 needs 24.15+) when nvm is installed, so
 # frontend targets work even in a terminal still holding an older Node on its PATH.
 NVM_SH = $${NVM_DIR:-$$HOME/.nvm}/nvm.sh
@@ -29,4 +33,4 @@ test: ## Go tests under the race detector, then Angular unit tests
 
 docker: ## build and run the production image (data persists in the brewfocus-data volume)
 	docker build -t brew-focus .
-	docker run --rm -p 5001:5001 -v brewfocus-data:/data -e JWT_SECRET=change-me brew-focus
+	docker run --rm -p 5001:5001 -v brewfocus-data:/data -e JWT_SECRET -e SECURE_COOKIES brew-focus

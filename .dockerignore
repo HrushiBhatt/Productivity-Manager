@@ -4,3 +4,7 @@ frontend/dist
 frontend/.angular
 backend/bin
 **/*.db
+.env
+.env.*
+*.pem
+*.key

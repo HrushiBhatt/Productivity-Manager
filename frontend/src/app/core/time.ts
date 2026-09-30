@@ -1,4 +1,4 @@
-export const pad = (n: number) => String(n).padStart(2, '0');
+const pad = (n: number) => String(n).padStart(2, '0');
 
 /** 1499.2 → "25:00". Rounds up so the clock reads 00:00 only when time is truly up. */
 export function formatClock(seconds: number): string {

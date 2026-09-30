@@ -10,7 +10,7 @@ import { formatClock, localDay } from './time';
 import { Timer } from './timer';
 import { Toasts } from './toast';
 
-export const DEFAULT_SETTINGS: Settings = {
+const DEFAULT_SETTINGS: Settings = {
   sound: true,
   notify: false,
   autoBreak: true,

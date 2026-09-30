@@ -2,7 +2,7 @@ import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { Api } from './api';
 import { FocusRequest, TimerAction, TimerState } from './models';
 
-export const IDLE: TimerState = {
+const IDLE: TimerState = {
   phase: 'focus',
   status: 'idle',
   duration_ms: 0,

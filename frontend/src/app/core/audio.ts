@@ -154,8 +154,7 @@ const RECIPES: Record<string, Recipe> = {
   },
 };
 
-export type Layer = keyof typeof RECIPES | 'custom';
-export const AMBIENCE = Object.keys(RECIPES);
+const AMBIENCE = Object.keys(RECIPES);
 
 const FADE = 0.25; // seconds of tail cross-faded over the head so loops have no seam
 

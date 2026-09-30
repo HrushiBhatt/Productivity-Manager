@@ -1,15 +1,29 @@
+# ---- secrets & local config: never commit these -------------------------------
+# Real values live in .env (copy .env.example); keys and certificates stay local.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# SQLite databases hold user accounts (emails, password hashes) and sessions.
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+
+# ---- build output & dependencies ---------------------------------------------
+node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+frontend/out-tsc/
+backend/bin/
+
+# ---- editor & OS noise -------------------------------------------------------------
 .DS_Store
 Thumbs.db
 *.log
 .idea/
 .vscode/
-
-# frontend
-node_modules/
-frontend/dist/
-frontend/.angular/
-
-# backend
-backend/bin/
-*.db
-*.db-*

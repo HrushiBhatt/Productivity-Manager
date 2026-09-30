@@ -54,7 +54,9 @@ make web       # terminal 2: Angular on :4200 → open http://localhost:4200
 - `make test` runs the Go tests under the race detector, then the Angular unit tests.
 - `make docker` builds and runs the production image.
 
-> Port 5001 is used because macOS reserves 5000 for AirPlay. Set `JWT_SECRET` in production. Without it, a random key is generated and everyone is logged out on each restart. Set `SECURE_COOKIES=true` when serving over HTTPS.
+> Port 5001 is used because macOS reserves 5000 for AirPlay.
+
+**Configuration & secrets.** Copy [`.env.example`](.env.example) to `.env` and fill it in. The `make` targets load it, and git and Docker both ignore it. `JWT_SECRET` signs login cookies and is required in production (`openssl rand -hex 32`). Without it, a random key is generated and everyone is logged out on each restart. Set `SECURE_COOKIES=true` when serving over HTTPS.
 
 ## Project structure
 
