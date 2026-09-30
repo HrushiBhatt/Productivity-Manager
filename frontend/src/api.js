@@ -1,3 +1,4 @@
+import { localApi } from './localApi';
 import { localDay } from './time';
 
 async function request(path, { method = 'GET', body } = {}) {
@@ -13,7 +14,7 @@ async function request(path, { method = 'GET', body } = {}) {
   return res.status === 204 ? null : res.json();
 }
 
-export const api = {
+const serverApi = {
   presets: () => request('/presets'),
   createPreset: (preset) => request('/presets', { method: 'POST', body: preset }),
   deletePreset: (id) => request(`/presets/${id}`, { method: 'DELETE' }),
@@ -23,3 +24,8 @@ export const api = {
   clearSessions: () => request('/sessions', { method: 'DELETE' }),
   stats: () => request(`/stats?today=${localDay()}`),
 };
+
+/** Static hosts like GitHub Pages have no server, so that build keeps data in the browser. */
+export const BROWSER_ONLY = import.meta.env.VITE_STORAGE === 'browser';
+
+export const api = BROWSER_ONLY ? localApi : serverApi;

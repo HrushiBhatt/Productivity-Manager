@@ -20,7 +20,7 @@ const DEFAULT_SETTINGS = { sound: true, notify: false, autoBreak: true, strict: 
 
 function notify(body) {
   if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification('Brew Focus', { body, icon: '/favicon.svg' });
+    new Notification('Brew Focus', { body, icon: `${import.meta.env.BASE_URL}favicon.svg` });
   }
 }
 

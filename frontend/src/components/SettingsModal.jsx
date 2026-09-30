@@ -1,3 +1,4 @@
+import { BROWSER_ONLY } from '../api';
 import { Modal } from './Modal';
 
 const TOGGLES = [
@@ -25,6 +26,7 @@ export function SettingsModal({ settings, onChange, onClearData, onClose }) {
       <p className="shortcuts">
         <kbd>Space</kbd> start / pause · <kbd>R</kbd> reset · <kbd>S</kbd> finish or skip
       </p>
+      {BROWSER_ONLY && <p className="setting-hint">This version saves your sessions and modes in this browser only.</p>}
       <button className="btn btn-danger px" onClick={onClearData}>
         Delete all sessions
       </button>

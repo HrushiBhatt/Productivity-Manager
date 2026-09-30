@@ -41,6 +41,12 @@ Run the backend tests with `make test`.
 
 > Port 5001 is used because macOS reserves 5000 for AirPlay.
 
+## Deploying
+
+**GitHub Pages (frontend only).** Every push to `main` runs [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml), which builds the React app and publishes it. One-time setup: repo **Settings → Pages → Source: GitHub Actions**. Pages can only serve static files, so this build can't reach Flask. It is built with `VITE_STORAGE=browser`, which stores modes and sessions in the visitor's browser instead, with the same features.
+
+**Full stack.** To run Flask and SQLite together, deploy to any host that runs Python and use `make serve`, where Flask serves the built app and the API from one process.
+
 ## Project structure
 
 ```
@@ -53,6 +59,7 @@ backend/
 frontend/
   src/
     App.jsx          session flow: intention → breathe → focus → reflect → break
+    api.js           Flask client; localApi.js is the browser-storage twin for Pages
     hooks/           useTimer (wall-clock countdown), useLiveTab, useLocalState
     audio.js         Web Audio chimes, ticks and procedural ambience
     sprites.js       pixel art as text (icons + café items)
