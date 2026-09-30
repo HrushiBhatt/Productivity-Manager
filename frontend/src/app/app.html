@@ -13,8 +13,14 @@
         <span
           class="live"
           [class.on]="live.connected()"
-          [title]="live.connected() ? 'Synced live with your other tabs and devices' : 'Reconnecting to the server…'"
-          >{{ live.connected() ? 'LIVE' : 'OFFLINE' }}</span
+          [title]="
+            live.isLocal
+              ? 'Demo mode: saved in this browser and synced across its tabs'
+              : live.connected()
+                ? 'Synced live with your other tabs and devices'
+                : 'Reconnecting to the server…'
+          "
+          >{{ live.isLocal ? 'LOCAL' : live.connected() ? 'LIVE' : 'OFFLINE' }}</span
         >
         <span class="user" [title]="user.email">{{ user.name }}</span>
         <button class="icon-btn settings-btn px" (click)="brew.dialog.set('settings')" aria-label="Settings">

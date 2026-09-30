@@ -4,6 +4,8 @@ A retro pixel-art productivity tracker. Focus sessions run **on the server**, so
 
 **Stack:** Go 1.27 (Gin, GORM, SQLite, JWT) · Angular 22 (standalone components, signals, zoneless) · TypeScript · Server-Sent Events · Docker
 
+**Live demo:** https://hrushibhatt.github.io/Productivity-Manager/. GitHub Pages can't run a server, so the demo runs the same API inside your browser (see [GitHub Pages](#github-pages)).
+
 ## How it works
 
 ```
@@ -53,6 +55,7 @@ make web       # terminal 2: Angular on :4200 → open http://localhost:4200
 - `make serve` builds everything and runs a single Go process serving the app and the API on :5001.
 - `make test` runs the Go tests under the race detector, then the Angular unit tests.
 - `make docker` builds and runs the production image.
+- `make demo` runs the GitHub Pages build locally, with no Go server needed.
 
 > Port 5001 is used because macOS reserves 5000 for AirPlay.
 
@@ -71,6 +74,7 @@ backend/
     api/               Gin handlers: account, resources, timer + SSE, stats
 frontend/src/app/
   core/                services: Api, Auth (+guard, interceptor), LiveEvents, Timer, Brew, Ambience
+  core/local/          the in-browser backend used by the GitHub Pages build
   brew/                timer stage, tasks, modes, ambience mixer
   progress/            stats, heatmap, café shelf, journal (signal-driven resource())
   dialogs/             intention, breathing, reflection, settings
@@ -105,8 +109,8 @@ All routes except `/api/health` and `/api/auth/*` require a session.
   - Slow SSE clients are dropped without blocking others.
   - Users can't reach each other's data.
   - Two clients stay in sync over the event stream.
-- **Angular (Vitest).** Clock-skew correction and out-of-order events in the timer, and the session flow as driven by live events.
-- **CI** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs both suites and builds the Docker image.
+- **Angular (Vitest).** Clock-skew correction and out-of-order events in the timer, the session flow as driven by live events, and the in-browser backend replaying the Go API's test scenarios.
+- **CI** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs both suites, builds the Docker image and, on `main`, publishes GitHub Pages.
 
 ## Deploying
 
@@ -116,7 +120,19 @@ The Dockerfile builds one small image: the Angular build and a static Go binary 
 docker run -p 5001:5001 -v brewfocus-data:/data -e JWT_SECRET=… brew-focus
 ```
 
-GitHub Pages only hosts static files, so it can't run this backend.
+### GitHub Pages
+
+On every push to `main`, CI builds the Pages version and publishes it to the `gh-pages` branch. GitHub's built-in **pages build and deployment** workflow then deploys it to https://hrushibhatt.github.io/Productivity-Manager/.
+
+**One-time setup:** in the repository, go to **Settings → Pages → Build and deployment**. Set **Source** to *Deploy from a branch*, and **Branch** to `gh-pages`, folder `/ (root)`. The `gh-pages` branch appears after the first CI run on `main`.
+
+Pages only serves static files, so this build (`ng build --configuration pages`) swaps the Go API for an in-browser backend ([`core/local`](frontend/src/app/core/local/local-backend.ts)):
+
+- **Same app code.** It has the same routes, validation, status codes and live events, so the Angular app is unchanged. An HTTP interceptor answers `/api` requests in the browser.
+- **Storage.** Data is kept in `localStorage`, and tabs stay in sync over a `BroadcastChannel`.
+- **Timers.** Every open tab arms the running timer's deadline, and a cross-tab Web Lock makes exactly one tab finish each block. That's the browser's version of one goroutine per timer.
+- **What's different.** The demo has no accounts, and data stays in that browser. Run the Go server (above) for accounts and sync across devices.
+- **Deep links.** `404.html` is a copy of the app, so links like `/progress` load it directly.
 
 ## License
 

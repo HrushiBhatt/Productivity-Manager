@@ -239,7 +239,7 @@ export class Brew {
 
   async createMode(name: string, focus: number, rest: number): Promise<void> {
     const preset = await this.api.createPreset({ name, focus, rest }); // errors go back to the form
-    this.presets.update((list) => [...list, preset]);
+    this.presets.update((list) => (list.some((p) => p.id === preset.id) ? list : [...list, preset]));
     this.modeKey.set(fromPreset(preset).key);
     this.toasts.show(`Saved “${preset.name}”`);
   }
@@ -256,7 +256,10 @@ export class Brew {
   async addTask(title: string, estimate: number): Promise<void> {
     await this.attempt(async () => {
       const task = await this.api.createTask(title, estimate);
-      this.tasks.update((list) => [...list.filter((t) => !t.done), task, ...list.filter((t) => t.done)]);
+      // The live "changed" event may have refetched the list already, so add it only if it's missing.
+      this.tasks.update((list) =>
+        list.some((t) => t.id === task.id) ? list : [...list.filter((t) => !t.done), task, ...list.filter((t) => t.done)],
+      );
     });
   }
 

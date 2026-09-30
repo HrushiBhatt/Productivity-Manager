@@ -1,4 +1,4 @@
-.PHONY: install api web build serve test docker
+.PHONY: install api web demo build serve test docker
 
 # Secrets and local config (JWT_SECRET, ...) come from an untracked .env; see .env.example.
 -include .env
@@ -19,6 +19,9 @@ api: ## Go API on :5001 (Ctrl+C shuts down gracefully; running timers resume on 
 
 web: ## Angular dev server on :4200, proxying /api to :5001
 	$(NODE) cd frontend && npx ng serve
+
+demo: ## the GitHub Pages build (backend runs in the browser) on :4200, no Go server needed
+	$(NODE) cd frontend && npx ng serve --configuration pages
 
 build: ## production frontend bundle + static Go binary
 	$(NODE) cd frontend && npx ng build

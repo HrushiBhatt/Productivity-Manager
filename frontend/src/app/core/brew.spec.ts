@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -74,6 +74,19 @@ describe('Brew session flow', () => {
     expect(brew.phase()).toBe('break');
     expect(brew.reflecting()).toBeNull(); // another device moved on
     expect(brew.fill()).toBeCloseTo(0, 2); // a fresh break starts empty and refills
+  });
+
+  it("doesn't duplicate a new mode when the live refresh lands before the save's response", async () => {
+    const http = TestBed.inject(HttpTestingController);
+    const preset = { id: 1, name: 'Thesis', focus: 75, rest: 15 };
+    const creating = brew.createMode('Thesis', 75, 15);
+    const post = http.expectOne({ method: 'POST', url: '/api/presets' });
+    events.next({ type: 'changed', data: { kind: 'presets' } }); // the server announces it first
+    http.expectOne({ method: 'GET', url: '/api/presets' }).flush([preset]);
+    await new Promise((resolve) => setTimeout(resolve));
+    post.flush(preset);
+    await creating;
+    expect(brew.presets()).toEqual([preset]);
   });
 
   it('waits for the play button when auto-start breaks is off', async () => {
