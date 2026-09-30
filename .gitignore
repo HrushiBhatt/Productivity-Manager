@@ -3,4 +3,14 @@ Thumbs.db
 *.log
 .idea/
 .vscode/
+
+# frontend
 node_modules/
+frontend/dist/
+
+# backend
+.venv/
+__pycache__/
+.pytest_cache/
+backend/instance/
+*.db

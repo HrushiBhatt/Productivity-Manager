@@ -1,0 +1,220 @@
+.progress-view {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .progress-view {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tiles,
+  .progress-view .wide {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---- stat tiles ------------------------------------------------------------ */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+@media (min-width: 720px) {
+  .tiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.tile {
+  display: grid;
+  gap: 8px;
+  margin: 3px;
+  padding: 16px;
+  background: var(--gray-900);
+}
+
+.tile-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+}
+
+.tile-value {
+  font-family: var(--font-pixel);
+  font-size: clamp(0.75rem, 2.8vw, 1.05rem);
+  line-height: 1.4;
+  color: var(--cream-light);
+}
+
+.tile-sub {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+/* ---- heatmap --------------------------------------------------------------- */
+
+.heatmap-scroll {
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.heatmap {
+  display: block;
+  margin-inline: auto;
+}
+
+.heatmap text {
+  font-family: var(--font-main);
+  font-size: 9px;
+  fill: var(--gray-500);
+}
+
+.heatmap rect:hover {
+  stroke: var(--cream-light);
+  stroke-width: 1.5;
+}
+
+.heat-0 { fill: var(--heat-0); background: var(--heat-0); }
+.heat-1 { fill: var(--heat-1); background: var(--heat-1); }
+.heat-2 { fill: var(--heat-2); background: var(--heat-2); }
+.heat-3 { fill: var(--heat-3); background: var(--heat-3); }
+.heat-4 { fill: var(--heat-4); background: var(--heat-4); }
+
+.heat-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--gray-400);
+}
+
+.heat-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+}
+
+.swatch {
+  width: 11px;
+  height: 11px;
+}
+
+/* ---- café shelf ------------------------------------------------------------ */
+
+.shelf {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px 0;
+  list-style: none;
+}
+
+.shelf li {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 0 4px 10px;
+  text-align: center;
+  border-bottom: 6px solid #4e342e; /* the wooden plank */
+}
+
+.shelf-sprite {
+  width: min(52px, 100%);
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.unlocked .shelf-sprite {
+  filter: drop-shadow(0 0 8px rgba(232, 196, 154, 0.2));
+  animation: bounce 3s ease-in-out infinite;
+}
+
+.shelf li:nth-child(2n) .shelf-sprite { animation-delay: 0.7s; }
+.shelf li:nth-child(3n) .shelf-sprite { animation-delay: 1.4s; }
+
+.shelf-name {
+  font-size: 0.72rem;
+  color: var(--gray-300);
+}
+
+.locked .shelf-name {
+  font-family: var(--font-pixel);
+  font-size: 0.42rem;
+  line-height: 1.6;
+  color: var(--gray-500);
+}
+
+.shelf-next {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+  font-size: 0.85rem;
+  color: var(--gray-400);
+}
+
+.meter {
+  height: 10px;
+  background: var(--gray-800);
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.6s var(--ease-out);
+}
+
+/* ---- journal --------------------------------------------------------------- */
+
+.journal {
+  display: grid;
+  gap: 12px;
+  max-height: 520px;
+  padding-right: 6px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.entry {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--gray-850);
+  border-left: 4px solid var(--accent);
+}
+
+.entry.early {
+  border-left-color: var(--gray-600);
+}
+
+.entry-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  font-size: 0.72rem;
+  color: var(--gray-400);
+}
+
+.entry-mins {
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  color: var(--accent-bright);
+}
+
+.entry p {
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.entry-reflection {
+  color: var(--gray-300);
+}

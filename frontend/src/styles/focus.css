@@ -1,0 +1,549 @@
+/* ---- focus view layout: stage first in the DOM, placed by grid areas ---- */
+
+.focus-view {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'stage' 'modes' 'mixer';
+}
+
+.stage { grid-area: stage; }
+.modes { grid-area: modes; }
+.mixer { grid-area: mixer; }
+
+@media (min-width: 760px) {
+  .focus-view {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas: 'stage stage' 'modes mixer';
+    align-items: start;
+  }
+}
+
+@media (min-width: 1120px) {
+  .focus-view {
+    grid-template-columns: 290px minmax(0, 1fr) 290px;
+    grid-template-areas: 'modes stage mixer';
+  }
+}
+
+/* ---- stage -------------------------------------------------------------- */
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.phase-chip {
+  padding: 8px 12px;
+  margin: 3px;
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  line-height: 1.6;
+  text-transform: uppercase;
+  color: var(--gray-300);
+  background: var(--gray-900);
+}
+
+.is-break .phase-chip {
+  --bd: var(--break-dim);
+  color: var(--break);
+}
+
+.mug {
+  position: relative;
+  width: min(100%, 340px);
+  aspect-ratio: 200 / 220;
+}
+
+.mug-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.8));
+  transition: transform 0.3s var(--ease-out);
+}
+
+.mug:hover .mug-svg {
+  transform: scale(1.02);
+}
+
+.mug-glow {
+  position: absolute;
+  top: 53%;
+  left: 46%;
+  width: 60%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.5s var(--ease-out);
+  pointer-events: none;
+}
+
+.mug.is-running .mug-glow {
+  opacity: 1;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.is-break .mug-glow {
+  background: radial-gradient(circle, rgba(143, 209, 158, 0.25) 0%, transparent 70%);
+}
+
+.steam {
+  position: absolute;
+  top: 1%;
+  left: 46%;
+  width: 26%;
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: opacity 0.5s var(--ease-out);
+  pointer-events: none;
+}
+
+.mug.is-running .steam {
+  opacity: 1;
+}
+
+.steam g {
+  animation: steam-rise 2s ease-out infinite;
+}
+
+.steam g:nth-child(2) { animation-delay: 0.4s; }
+.steam g:nth-child(3) { animation-delay: 0.8s; }
+
+.mug-readout {
+  position: absolute;
+  top: 53%;
+  left: 46%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.clock {
+  font-family: var(--font-pixel);
+  font-size: clamp(1.5rem, 7vw, 2.3rem);
+  white-space: nowrap;
+  color: var(--cream-light);
+  text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+}
+
+.mug.is-running .clock-sep {
+  animation: blink 1s steps(1) infinite;
+}
+
+.clock-label {
+  margin-top: 12px;
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  color: var(--accent);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.is-break .clock-label {
+  color: var(--break);
+}
+
+.mug.is-celebrating .mug-svg {
+  animation: celebrate 0.3s var(--ease-bounce) 4;
+}
+
+.intention {
+  max-width: 440px;
+  min-height: 1.5em;
+  font-size: 1rem;
+  color: var(--cream);
+  overflow-wrap: anywhere;
+}
+
+.intention.is-empty,
+.is-break .intention {
+  font-size: 0.85rem;
+  color: var(--gray-500);
+}
+
+.segments {
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  gap: 3px;
+  width: min(100%, 360px);
+}
+
+.segments span {
+  height: 10px;
+  background: var(--gray-800);
+}
+
+.segments .on {
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+
+.is-break .segments .on {
+  background: var(--break);
+  box-shadow: none;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding-bottom: 6px;
+}
+
+.ctrl {
+  --bd: var(--gray-600);
+  --lift: 7px;
+  --drop: var(--black);
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  color: var(--gray-300);
+  background: var(--gray-800);
+  transition: transform 0.12s, color 0.2s;
+}
+
+.ctrl:hover:not(:disabled) {
+  color: var(--cream-light);
+  transform: translateY(-2px);
+}
+
+.ctrl:active:not(:disabled) {
+  --lift: 3px;
+  transform: translateY(3px);
+}
+
+.ctrl-play {
+  --bd: var(--accent-bright);
+  --drop: var(--coffee-dark);
+  width: 76px;
+  height: 76px;
+  color: var(--black);
+  background: var(--accent);
+}
+
+.ctrl-play:hover:not(:disabled) {
+  color: var(--black);
+}
+
+.ctrl-play .icon {
+  width: 26px;
+  height: 26px;
+}
+
+.is-break .ctrl-play {
+  --bd: #b9e6c3;
+  --drop: var(--break-dim);
+  background: var(--break);
+}
+
+.today {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 20px;
+  font-size: 0.8rem;
+  color: var(--gray-400);
+}
+
+.today b {
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+  font-weight: normal;
+  color: var(--cream-light);
+}
+
+/* ---- modes -------------------------------------------------------------- */
+
+.mode-list {
+  display: grid;
+  gap: 14px;
+  list-style: none;
+}
+
+.mode-item {
+  position: relative;
+}
+
+.mode {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 2px 14px;
+  width: calc(100% - 6px);
+  margin: 0 3px;
+  padding: 12px 14px;
+  text-align: left;
+  background: var(--gray-850);
+  transition: transform 0.15s, background 0.15s;
+}
+
+.mode:hover:not(:disabled) {
+  background: var(--gray-800);
+  transform: translateX(3px);
+}
+
+.mode[aria-pressed='true'] {
+  --bd: var(--accent);
+  background: var(--accent-soft);
+}
+
+.mode-time {
+  grid-row: span 2;
+  min-width: 58px;
+  font-family: var(--font-pixel);
+  font-size: 0.8rem;
+  color: var(--accent-bright);
+}
+
+.mode-time small {
+  font-size: 0.5rem;
+  color: var(--gray-400);
+}
+
+.mode-name {
+  font-weight: 600;
+}
+
+.mode-blurb {
+  font-size: 0.75rem;
+  color: var(--gray-400);
+}
+
+.mode-delete {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: var(--gray-500);
+}
+
+.mode-delete:hover:not(:disabled) {
+  color: var(--danger);
+}
+
+.custom {
+  margin-top: 18px;
+  border-top: 2px dashed var(--gray-700);
+}
+
+.custom summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0 6px;
+  font-size: 0.9rem;
+  color: var(--gray-300);
+  list-style: none;
+  cursor: pointer;
+}
+
+.custom summary::-webkit-details-marker {
+  display: none;
+}
+
+.custom summary::after {
+  content: '+';
+  font-family: var(--font-pixel);
+  font-size: 0.7rem;
+  color: var(--accent);
+}
+
+.custom[open] summary::after {
+  content: '−';
+}
+
+.custom-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding-top: 12px;
+}
+
+.custom-form .wide {
+  grid-column: 1 / -1;
+}
+
+.form-error {
+  font-size: 0.8rem;
+  color: var(--danger);
+}
+
+/* ---- ambience mixer -------------------------------------------------------- */
+
+.layers {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.layer {
+  display: grid;
+  grid-template-columns: 22px 92px 1fr;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+}
+
+.layer-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-pick {
+  color: var(--accent);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.file-pick:focus-within {
+  outline: 2px dashed var(--accent);
+}
+
+.mixer-sub {
+  margin: 24px 0 12px;
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  color: var(--gray-400);
+  text-transform: uppercase;
+}
+
+.seg-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 0 3px;
+}
+
+.seg {
+  padding: 10px 4px;
+  font-family: var(--font-pixel);
+  font-size: 0.45rem;
+  color: var(--gray-400);
+  background: var(--gray-850);
+}
+
+.seg[aria-checked='true'] {
+  --bd: var(--accent);
+  color: var(--accent-bright);
+  background: var(--accent-soft);
+}
+
+/* ---- breathing & reflection ------------------------------------------------ */
+
+.breath {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 12px 0;
+}
+
+.breath-box {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 150px;
+  height: 150px;
+  margin-bottom: 8px;
+  box-shadow: inset 0 0 0 3px var(--gray-600);
+}
+
+.breath-fill {
+  width: 100%;
+  height: 100%;
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 3px var(--accent);
+  animation: breath-fill 16s linear infinite;
+}
+
+.breath-dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--accent-bright);
+  box-shadow: 0 0 12px var(--accent-glow);
+  animation: breath-trace 16s linear infinite;
+}
+
+.breath-cue {
+  font-family: var(--font-pixel);
+  font-size: 0.75rem;
+  color: var(--accent-bright);
+}
+
+.breath-count {
+  font-family: var(--font-pixel);
+  font-size: 1.5rem;
+}
+
+.reflect-summary {
+  line-height: 1.6;
+  color: var(--cream);
+}
+
+.reflect-summary q {
+  color: var(--accent-bright);
+}
+
+.unlock {
+  --bd: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 3px;
+  padding: 12px 16px;
+  background: var(--accent-soft);
+  animation: pop 0.4s var(--ease-bounce);
+}
+
+.unlock-sprite {
+  flex: none;
+  width: 44px;
+  height: 44px;
+}
+
+/* ---- animation ------------------------------------------------------------ */
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.85; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+@keyframes steam-rise {
+  0% { opacity: 0; transform: translateY(0); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+
+@keyframes blink {
+  50% { opacity: 0.2; }
+}
+
+@keyframes celebrate {
+  0%, 100% { transform: scale(1) rotate(0); }
+  25% { transform: scale(1.1) rotate(-5deg); }
+  75% { transform: scale(1.1) rotate(5deg); }
+}
+
+/* Box breathing: inhale (grow) → hold → exhale (shrink) → hold, 4 s each. */
+@keyframes breath-fill {
+  0%, 100% { transform: scale(0.3); }
+  25%, 50% { transform: scale(1); }
+  75% { transform: scale(0.3); }
+}
+
+@keyframes breath-trace {
+  0%, 100% { left: -5px; top: -5px; }
+  25% { left: calc(100% - 7px); top: -5px; }
+  50% { left: calc(100% - 7px); top: calc(100% - 7px); }
+  75% { left: -5px; top: calc(100% - 7px); }
+}
